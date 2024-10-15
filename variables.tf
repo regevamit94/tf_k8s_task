@@ -23,7 +23,7 @@ variable "tenant_id" {
 
 variable "region" {
   type        = string
-  default     = "West Europe"
+  default     = "northeurope"
   description = "The region I use"
 }
 
@@ -57,4 +57,19 @@ variable "subnet_cidr" {
   description = "My subnet cidr"
 }
 
+#########     network_profile    #############
+variable dns_service_ip {
+  type        = string
+  default     = "10.1.0.2"
+  description = "description"
+}
+
+variable service_cidr {
+  type        = string
+  default     = "10.1.0.0/24"
+  description = "description"
+}
+
+
+#############################################
 

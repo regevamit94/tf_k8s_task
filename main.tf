@@ -18,8 +18,8 @@ provider "azurerm" {
     client_secret = var.client_secret
     tenant_id = var.tenant_id
 
-    resource_provider_registrations = "none"
-   }
+    #resource_provider_registrations = "none"
+}
 
 
 resource "azurerm_resource_group" "hometask_RG" {
@@ -48,16 +48,17 @@ resource "azurerm_subnet" "hometask_subnet" {
   resource_group_name = azurerm_resource_group.hometask_RG.name
   virtual_network_name = azurerm_virtual_network.hometask_virtual_network.name
   address_prefixes = var.subnet_cidr
+
 } 
 
-resource "azurerm_public_ip" "hometask_public_ip" {
-  name                = "hometask-public-ip"
+resource "azurerm_public_ip" "hometask_load_balancer_ip" {
+  name                = "hometask-load-balancer-ip"
   location            = var.region
   resource_group_name = azurerm_resource_group.hometask_RG.name
   allocation_method   = "Static"
 
-tags = {
-    Name = "hometask public ip"
+  tags = {
+    Name = "hometask load balancer public ip"
   }
 }
 
@@ -81,12 +82,13 @@ identity {
 
 network_profile {
     network_plugin    = "azure"
-    dns_service_ip    = "10.0.0.2"
-    service_cidr      = "10.0.0.0/24"
+    dns_service_ip    = var.dns_service_ip
+    service_cidr      = var.service_cidr
     }
 
     tags = {
         Name = "hometask Azure K8S Cluster"
     }
+  depends_on = [azurerm_subnet.hometask_subnet]
 }
 
