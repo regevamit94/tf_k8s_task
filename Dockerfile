@@ -1,4 +1,4 @@
-From Ubuntu:latest
+From ubuntu:latest
 
 RUN apt update && apt install nginx
 

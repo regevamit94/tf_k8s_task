@@ -15,7 +15,7 @@ steps:
     inputs:
       containerRegistry: $(ACR_SERVICE_CON)
       repository: $(ACR_LOGIN_SERVER)/$(IMAGE_NAME)
-      command: buildAndPush
+      command: 'buildAndPush'
       Dockerfile: '**/Dockerfile'
       tags: |
         $(IMAGE_TAG)
