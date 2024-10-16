@@ -8,12 +8,6 @@ pool:
 
 variables:
 - group: hometask_VAR
-  ACR_LOGIN_SERVER: "myimagesvault.azurecr.io"
-  #IMAGE_NAME: "hometask-image"
-  #IMAGE_TAG: "$(Build.BuildId)"
-  SERVICE_CON: "auth_to_azure_services"
-  RESOURCE_GRP: "hometask_RG"
-  #AKS_CLUSTER: "hometask_AKS_Cluster"
 
 steps:
   - task: Docker@2
