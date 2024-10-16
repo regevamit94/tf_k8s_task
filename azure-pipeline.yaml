@@ -12,7 +12,7 @@ variables:
 steps:
   - task: Docker@2
     inputs:
-      containerRegistry: $SERVICE_CON
+      containerRegistry: $(SERVICE_CON)
       repository: '$(ACR_LOGIN_SERVER)/$(IMAGE_NAME)'
       command: 'buildAndPush'
       Dockerfile: '**/Dockerfile'
@@ -22,9 +22,9 @@ steps:
   - task: Kubernetes@1
     inputs:
       connectionType: 'Azure Resource Manager'
-      azureSubscriptionEndpoint: $SERVICE_CON
-      azureResourceGroup: $RESOURCE_GRP
-      kubernetesCluster: $AKS_CLUSTER
+      azureSubscriptionEndpoint: $(SERVICE_CON)
+      azureResourceGroup: $(RESOURCE_GRP)
+      kubernetesCluster: $(AKS_CLUSTER)
       command: 'apply'
       useConfigurationFile: true
       configuration: app.yaml
