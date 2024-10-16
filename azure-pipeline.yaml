@@ -6,7 +6,7 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
   name: 'Default'
-  demands: MyHomePC
+  demands: 'MyHomePC'
 
 variables:
 - group: hometask_VAR
