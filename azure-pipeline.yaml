@@ -4,7 +4,6 @@ trigger:
       - main 
 
 pool:
-  vmImage: 'ubuntu-latest'
   name: 'Default'
   demands: 'MyHomePC'
 
@@ -15,8 +14,8 @@ steps:
   - task: Docker@2
     inputs:
       containerRegistry: $(ACR_SERVICE_CON)
-      repository: '$(ACR_LOGIN_SERVER)/$(IMAGE_NAME)'
-      command: 'buildAndPush'
+      repository: $(ACR_LOGIN_SERVER)/$(IMAGE_NAME)
+      command: buildAndPush
       Dockerfile: '**/Dockerfile'
       tags: |
         $(IMAGE_TAG)
