@@ -1,6 +1,11 @@
 From ubuntu:latest
 
-RUN apt update && apt install nginx
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && \
+    apt-get install -y nginx && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 EXPOSE 80
 
