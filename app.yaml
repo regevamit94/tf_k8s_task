@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hometask-app
+  labels:
+    app: hometask-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hometask-app
+  template:
+    metadata:
+      labels:
+        app: hometask-app
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nginx-configmap
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: nginx-configmap
+        configMap:
+          name: hometask-app-configmap
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hometask-app-configmap
+data:
+  index.html: |
+    <html>
+    <head>
+      <title>Hello Guys from UBTech</title>
+    </head>
+    <body>
+      <h1>This is my hello world App</h1>
+      <p>I have created this application in a Kubernetes cluster created by terraform.</p>
+    </body>
+    </html>
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: hometask-app-service
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-ip: "13.74.119.33"
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: hometask-app

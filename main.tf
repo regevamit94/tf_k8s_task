@@ -1,5 +1,4 @@
-# We strongly recommend using the required_providers block to set the
-# Azure Provider source and version being used
+
 terraform {
   required_providers {
     azurerm = {
@@ -62,6 +61,12 @@ resource "azurerm_public_ip" "hometask_load_balancer_ip" {
   }
 }
 
+resource "azurerm_container_registry" "images_vault" {
+  name                = "myImagesVault"
+  resource_group_name = azurerm_resource_group.hometask_RG.name
+  location            = azurerm_resource_group.hometask_RG.location
+  sku                 = "Premium"
+}
 
 resource "azurerm_kubernetes_cluster" "hometask_AKS" {
 name                = "hometask_AKS_Cluster"
@@ -92,3 +97,9 @@ network_profile {
   depends_on = [azurerm_subnet.hometask_subnet]
 }
 
+resource "azurerm_role_assignment" "assign_acr_to_k8s" {
+  principal_id                     = azurerm_kubernetes_cluster.hometask_AKS.kubelet_identity[0].object_id
+  role_definition_name             = "AcrPull"
+  scope                            = azurerm_container_registry.images_vault.id
+  skip_service_principal_aad_check = true
+}
