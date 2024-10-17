@@ -98,8 +98,9 @@ network_profile {
 }
 
 resource "azurerm_role_assignment" "assign_acr_to_k8s" {
-  principal_id                     = azurerm_kubernetes_cluster.hometask_AKS.kubelet_identity[0].object_id
+  principal_id                     = azurerm_kubernetes_cluster.hometask_AKS.identity[0].principal_id
   role_definition_name             = "AcrPull"
   scope                            = azurerm_container_registry.images_vault.id
   skip_service_principal_aad_check = true
 }
+
