@@ -20,7 +20,6 @@ provider "azurerm" {
     #resource_provider_registrations = "none"
 }
 
-
 resource "azurerm_resource_group" "hometask_RG" {
   name     = var.my_resource_group_name
   location = var.region
@@ -30,6 +29,32 @@ resource "azurerm_resource_group" "hometask_RG" {
   }
 
 }
+
+data "azurerm_client_config" "current_client" {}
+
+resource "null_resource" "run_role_assignment_script" {
+  provisioner "local-exec" {
+    command = <<EOT
+      #!/bin/bash
+
+      principal_id="${data.azurerm_client_config.current_client.object_id}"
+
+      if [[ -z "$principal_id" ]]; then
+        echo "Error: Unable to get the principal ID from Terraform."
+        exit 1
+      fi
+
+      echo "Terraform is using the principal with Object ID: $principal_id"
+
+      az role assignment create \
+        --assignee $principal_id \
+        --role "User Access Administrator" \
+        --scope "/subscriptions/${var.subscription_id}/resourceGroups/${azurerm_resource_group.hometask_RG.name}"
+    EOT
+  }
+  depends_on = [azurerm_resource_group.hometask_RG]
+}
+
 
 resource "azurerm_virtual_network" "hometask_virtual_network" {
   name                = var.vnet_name
@@ -69,7 +94,7 @@ resource "azurerm_container_registry" "images_vault" {
 }
 
 resource "azurerm_kubernetes_cluster" "hometask_AKS" {
-name                = "hometask_AKS_Cluster"
+name                = var.aks_name
 resource_group_name = azurerm_resource_group.hometask_RG.name
 location            = azurerm_resource_group.hometask_RG.location
 dns_prefix          = "hometaskK8S"
@@ -97,10 +122,17 @@ network_profile {
   depends_on = [azurerm_subnet.hometask_subnet]
 }
 
+
 resource "azurerm_role_assignment" "assign_acr_to_k8s" {
   principal_id                     = azurerm_kubernetes_cluster.hometask_AKS.identity[0].principal_id
   role_definition_name             = "AcrPull"
   scope                            = azurerm_container_registry.images_vault.id
   skip_service_principal_aad_check = true
+
 }
+
+/*
+After Terraform finishes creating resources, manually point kubectl to the azure AKS:
+az aks get-credentials --resource-group ${var.my_resource_group_name} --name ${var.aks_name}
+
 

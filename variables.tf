@@ -57,6 +57,13 @@ variable "subnet_cidr" {
   description = "My subnet cidr"
 }
 
+variable aks_name {
+  type        = string
+  default     = "hometask_AKS_Cluster"
+  description = "description"
+}
+
+
 #########     network_profile    #############
 variable dns_service_ip {
   type        = string
