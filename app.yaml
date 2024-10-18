@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: myImagesVault.azurecr.io/hometask-image:1
+        image: myImagesVault.azurecr.io/hometask-image:35
         ports:
         - containerPort: 80
         volumeMounts:

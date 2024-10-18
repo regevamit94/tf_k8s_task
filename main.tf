@@ -130,7 +130,7 @@ resource "azurerm_role_assignment" "assign_acr_to_k8s" {
 
 }
 
-resource "azuread_application" "my_application" {
+/*resource "azuread_application" "my_application" {
   display_name = "My Application"
 }
 
@@ -143,7 +143,7 @@ resource "azurerm_role_assignment" "my_push_to_acr_role" {
     role_definition_name  = "AcrPush"
     scope                = azurerm_container_registry.images_vault.id
 }
-/*
+
 After Terraform finishes creating resources, manually point kubectl to the azure AKS:
 az aks get-credentials --resource-group ${var.my_resource_group_name} --name ${var.aks_name}
 */
