@@ -27,5 +27,5 @@ steps:
       kubernetesCluster: $(AKS_CLUSTER)
       command: 'apply'
       useConfigurationFile: true
-      configuration: pipe&app/app.yaml
+      configuration: app.yaml
       
