@@ -33,6 +33,13 @@ variable "my_resource_group_name" {
   description = "My resource group name"
 }
 
+variable acr_name {
+  type        = string
+  default     = "myImagesVault"
+  description = "description"
+}
+
+
 variable "vnet_name" {
   type        = string
   default     = "hometask_VNet"

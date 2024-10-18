@@ -1,4 +1,3 @@
-
 terraform {
   required_providers {
     azurerm = {
@@ -87,7 +86,7 @@ resource "azurerm_public_ip" "hometask_load_balancer_ip" {
 }
 
 resource "azurerm_container_registry" "images_vault" {
-  name                = "myImagesVault"
+  name                = var.acr_name
   resource_group_name = azurerm_resource_group.hometask_RG.name
   location            = azurerm_resource_group.hometask_RG.location
   sku                 = "Premium"
@@ -131,8 +130,21 @@ resource "azurerm_role_assignment" "assign_acr_to_k8s" {
 
 }
 
+resource "azuread_application" "my_application" {
+  display_name = "My Application"
+}
+
+resource "azuread_service_principal" "my_service_principal" {
+  application_id = azuread_application.my_application.application_id
+}
+
+resource "azurerm_role_assignment" "my_push_to_acr_role" {
+    principal_id         = azuread_service_principal.my_service_principal.id
+    role_definition_name  = "AcrPush"
+    scope                = azurerm_container_registry.images_vault.id
+}
 /*
 After Terraform finishes creating resources, manually point kubectl to the azure AKS:
 az aks get-credentials --resource-group ${var.my_resource_group_name} --name ${var.aks_name}
-
+*/
 
