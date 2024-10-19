@@ -23,7 +23,7 @@ spec:
         - name: nginx-configmap
           mountPath: /usr/share/nginx/html
       imagePullSecrets:
-      - name: acr-image-pull-secret
+      - name: acr-docker-registry-secret
       volumes:
       - name: nginx-configmap
         configMap:
