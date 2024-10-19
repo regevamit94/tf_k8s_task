@@ -19,6 +19,12 @@ variable "tenant_id" {
   type        = string
   description = "My Azure account tenant ID"
 }
+
+variable org_pat {
+  type        = string
+  description = "My azure devops personal access token"
+}
+
 ########### End of privileged data #############
 
 variable "region" {
@@ -29,20 +35,20 @@ variable "region" {
 
 variable "my_resource_group_name" {
   type        = string
-  default     = "hometask_RG"
+  default     = "hometask_rg"
   description = "My resource group name"
 }
 
 variable acr_name {
   type        = string
-  default     = "myImagesVault"
+  default     = "hometaskregistry"
   description = "description"
 }
 
 
 variable "vnet_name" {
   type        = string
-  default     = "hometask_VNet"
+  default     = "hometask_vnet"
   description = "My virtual network name"
 }
 
@@ -54,7 +60,7 @@ variable "address_space" {
 
 variable "subnet_name" {
   type        = string
-  default     = "hometask_Subnet"
+  default     = "hometask_subnet"
   description = "My subnet name"
 }
 
@@ -87,3 +93,17 @@ variable service_cidr {
 
 #############################################
 
+variable org_service_url {
+  type        = string
+  default     = "https://dev.azure.com/regevamit"
+}
+
+variable cicd_project_name {
+  type        = string
+  default     = "hometask-CI_CD"
+}
+
+variable var_group_name {
+  type        = string
+  default     = "hometask_VAR"
+}
