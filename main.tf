@@ -165,7 +165,7 @@ provider "kubernetes" {
   client_key              = base64decode(azurerm_kubernetes_cluster.hometask_AKS.kube_config[0].client_key)
   cluster_ca_certificate  = base64decode(azurerm_kubernetes_cluster.hometask_AKS.kube_config[0].cluster_ca_certificate)
 }
-/*
+
 resource "kubernetes_secret" "acr_docker_registry_secret" {
   metadata {
     name      = "acr-docker-registry-secret"
@@ -175,7 +175,7 @@ resource "kubernetes_secret" "acr_docker_registry_secret" {
   type = "kubernetes.io/dockerconfigjson"
   
   data = {
-    ".dockerconfigjson" = base64encode(jsonencode({
+    ".dockerconfigjson" = jsonencode({
       "auths" = {
         "${azurerm_container_registry.images_vault.login_server}" = {
           "username" = azurerm_container_registry_token.acr_token.name
@@ -183,12 +183,12 @@ resource "kubernetes_secret" "acr_docker_registry_secret" {
           "auth"     = base64encode("${azurerm_container_registry_token.acr_token.name}:${azurerm_container_registry_token_password.acr_token_password.password1[0].value}")
         }
       }
-    }))
+    })
   }
 }
 
 
-Creation of json local file to check the error: "Secret "acr-docker-registry-secret" is invalid: data[.dockerconfigjson]: Invalid value: "<secret contents redacted>": invalid character 'e' looking for beginning of value"
+#Creation of json local file to check the error: "Secret "acr-docker-registry-secret" is invalid: data[.dockerconfigjson]: Invalid value: "<secret contents redacted>": invalid character 'e' looking for beginning of value"
 
 resource "local_file" "docker_config_json" {
   content = jsonencode({
@@ -202,7 +202,6 @@ resource "local_file" "docker_config_json" {
   })
   filename = "${path.module}/docker_config.json"  # Specify the file name and location
 }
-*/
 
 
 # Using that didn't work for some reason (ask for explanation)
@@ -211,6 +210,8 @@ resource "azurerm_role_assignment" "assign_acr_to_k8s" {
   role_definition_name             = "AcrPull"
   scope                            = azurerm_container_registry.images_vault.id
   skip_service_principal_aad_check = true
+
+  depends_on = [null_resource.run_role_assignment_script]
 }
 
 # After Terraform finishes creating resources, manually point kubectl to the azure AKS:

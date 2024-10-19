@@ -15,15 +15,9 @@ spec:
         app: hometask-app
     spec:
       containers:
-<<<<<<< HEAD
       - name: hometask-image
-        image: hometaskregistry.azurecr.io/hometask-image:46
+        image: $(ACR_LOGIN_SERVER)/$(IMAGE_NAME):$(IMAGE_TAG)
         ports: 
-=======
-      - name: nginx
-        image: myImagesVault.azurecr.io/hometask-image:27
-        ports:
->>>>>>> parent of 1daba12 (k8s role assignment to pull from docker registery fixed)
         - containerPort: 80
         volumeMounts:
         - name: nginx-configmap
