@@ -107,3 +107,16 @@ variable var_group_name {
   type        = string
   default     = "hometask_VAR"
 }
+
+
+variable to_acr_service_connection_name {
+  type        = string
+  default     = "project_access_to_acr"
+  description = "description"
+}
+
+variable to_rg_service_connection_name {
+  type        = string
+  default     = "access_to_azure_resources"
+  description = "description"
+}

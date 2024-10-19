@@ -187,9 +187,8 @@ resource "kubernetes_secret" "acr_docker_registry_secret" {
   }
 }
 
-
+/*
 #Creation of json local file to check the error: "Secret "acr-docker-registry-secret" is invalid: data[.dockerconfigjson]: Invalid value: "<secret contents redacted>": invalid character 'e' looking for beginning of value"
-
 resource "local_file" "docker_config_json" {
   content = jsonencode({
     "auths" = {
@@ -200,8 +199,9 @@ resource "local_file" "docker_config_json" {
       }
     }
   })
-  filename = "${path.module}/docker_config.json"  # Specify the file name and location
+  filename = "${path.module}/docker_config.json"
 }
+*/
 
 
 # Using that didn't work for some reason (ask for explanation)
@@ -246,7 +246,7 @@ locals {
     },
     {
       name      = "ACR_SERVICE_CON"
-      value     = "allow_pipelines_using_acr"
+      value     = azuredevops_serviceendpoint_dockerregistry.acr_service_connection.service_endpoint_name
       is_secret = false
     },
     {
@@ -271,10 +271,32 @@ locals {
     },
     {
       name      = "K8S_SERVICE_CON"
-      value     = "auth_to_azure_services"
+      value     = azuredevops_serviceendpoint_dockerregistry.acr_service_connection.service_endpoint_name
       is_secret = false
     }
   ]
+}
+
+resource "azuredevops_serviceendpoint_dockerregistry" "acr_service_connection" {
+  project_id            = azuredevops_project.cicd_project.id
+  service_endpoint_name = var.to_acr_service_connection_name
+  description           = "Docker registry service connection for ACR"
+  
+  docker_registry       = azurerm_container_registry.images_vault.login_server
+  docker_username       = var.client_id
+  docker_password       = var.client_secret
+}
+
+resource "azuredevops_serviceendpoint_azurerm" "arm_service_connection" {
+  project_id            = azuredevops_project.cicd_project.id
+  service_endpoint_name = var.to_rg_service_connection_name
+  description           = "Azure Resource Manager service connection for the resource group"
+
+  azurerm_spn_tenantid      = var.tenant_id
+  azurerm_subscription_id   = var.subscription_id
+  azurerm_subscription_name = "my subscription name"
+  environment               = "AzureCloud"
+  resource_group = azurerm_resource_group.hometask_rg.name
 }
 
 resource "azuredevops_variable_group" "my_variable_group" {
@@ -291,3 +313,5 @@ resource "azuredevops_variable_group" "my_variable_group" {
     }
   }
 }
+
+
