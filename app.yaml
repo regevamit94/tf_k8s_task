@@ -53,7 +53,7 @@ kind: Service
 metadata:
   name: hometask-app-service
   annotations:
-    service.beta.kubernetes.io/azure-load-balancer-ip: "13.74.119.33"
+    service.beta.kubernetes.io/azure-load-balancer-ip: '{{LOADBALANCER_PUB_IP}}'
 spec:
   type: LoadBalancer
   ports:
