@@ -21,7 +21,7 @@ spec:
         - containerPort: 80
         volumeMounts:
         - name: nginx-configmap
-          mountPath: /usr/share/nginx/html
+          mountPath: /var/www/html
       imagePullSecrets:
       - name: acr-docker-registry-secret
       volumes:
