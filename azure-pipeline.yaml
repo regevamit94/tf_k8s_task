@@ -19,16 +19,6 @@ steps:
       tags: |
         $(IMAGE_TAG)
 
-  - task: Bash@3
-    displayName: 'Replace variables in Kubernetes manifest'
-    inputs:
-      targetType: 'inline'
-      script: |
-        # Use sed to replace the placeholders in app.yaml
-        sed -i 's#$(ACR_LOGIN_SERVER)#$(ACR_LOGIN_SERVER)#g' app.yaml
-        sed -i 's#$(IMAGE_NAME)#$(IMAGE_NAME)#g' app.yaml
-        sed -i 's#$(IMAGE_TAG)#$(IMAGE_TAG)#g' app.yaml
-
   - task: Kubernetes@1
     inputs:
       connectionType: 'Azure Resource Manager'
