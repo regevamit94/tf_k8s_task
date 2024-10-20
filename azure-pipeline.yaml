@@ -19,6 +19,12 @@ steps:
       tags: |
         $(IMAGE_TAG)
 
+  - script: |
+      echo "Substituting variables in app.yaml with sed"
+      sed -i 's#{{ACR_LOGIN_SERVER}}#$(ACR_LOGIN_SERVER)#g' app.yaml
+      sed -i 's#{{IMAGE_NAME}}#$(IMAGE_NAME)#g' app.yaml
+      sed -i 's#{{IMAGE_TAG}}#$(IMAGE_TAG)#g' app.yaml
+
   - task: Kubernetes@1
     inputs:
       connectionType: 'Azure Resource Manager'
