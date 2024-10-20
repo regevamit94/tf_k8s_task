@@ -82,17 +82,20 @@ resource "azurerm_subnet" "hometask_subnet" {
 } 
 
 ############      LoadBalancer Public IP creation       #############
-resource "azurerm_public_ip" "hometask_load_balancer_ip" {
+resource "azurerm_public_ip" "hometask_public_ip" {
   name                = "hometask-load-balancer-ip"
   location            = var.region
   resource_group_name = azurerm_resource_group.hometask_rg.name
   allocation_method   = "Static"
 
   tags = {
-    Name = "hometask load balancer public ip"
+    Name = "hometask public ip address"
   }
 }
 
+output "public_ip_address" {
+  value = azurerm_public_ip.hometask_public_ip.ip_address
+}
 
 ###########      ACR Creation       ###########
 resource "azurerm_container_registry" "images_vault" {
@@ -280,6 +283,11 @@ locals {
     {
       name      = "TO_RG_SERVICE_CON"
       value     = azuredevops_serviceendpoint_azurerm.arm_service_connection.service_endpoint_name
+      is_secret = false
+    },
+    {
+      name      = "PUBLIC_IP"
+      value     = azurerm_public_ip.hometask_public_ip.ip_address
       is_secret = false
     }
   ]
