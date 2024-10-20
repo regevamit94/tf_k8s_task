@@ -18,10 +18,10 @@ provider "azurerm" {
     client_id = var.client_id
     client_secret = var.client_secret
     tenant_id = var.tenant_id
-
-    #resource_provider_registrations = "none"
 }
 
+
+##########      Resource group creation      ##########
 resource "azurerm_resource_group" "hometask_rg" {
   name     = var.my_resource_group_name
   location = var.region
@@ -32,6 +32,8 @@ resource "azurerm_resource_group" "hometask_rg" {
 
 }
 
+
+#########       Grant Terraform access to manage resources      ###########
 data "azurerm_client_config" "current_client" {}
 
 resource "null_resource" "run_role_assignment_script" {
@@ -57,7 +59,7 @@ resource "null_resource" "run_role_assignment_script" {
   depends_on = [azurerm_resource_group.hometask_rg]
 }
 
-
+########     Virtual network creation      ##########
 resource "azurerm_virtual_network" "hometask_virtual_network" {
   name                = var.vnet_name
   address_space       = var.address_space
@@ -69,6 +71,8 @@ resource "azurerm_virtual_network" "hometask_virtual_network" {
   }
 }
 
+
+########     Subnet creation      ##########
 resource "azurerm_subnet" "hometask_subnet" {
   name = var.subnet_name
   resource_group_name = azurerm_resource_group.hometask_rg.name
@@ -77,6 +81,7 @@ resource "azurerm_subnet" "hometask_subnet" {
 
 } 
 
+############      LoadBalancer Public IP creation       #############
 resource "azurerm_public_ip" "hometask_load_balancer_ip" {
   name                = "hometask-load-balancer-ip"
   location            = var.region
@@ -88,6 +93,8 @@ resource "azurerm_public_ip" "hometask_load_balancer_ip" {
   }
 }
 
+
+###########      ACR Creation       ###########
 resource "azurerm_container_registry" "images_vault" {
   name                = var.acr_name
   resource_group_name = azurerm_resource_group.hometask_rg.name
@@ -95,6 +102,8 @@ resource "azurerm_container_registry" "images_vault" {
   sku                 = "Premium"
 }
 
+
+############      K8S Cluster creation       #############
 resource "azurerm_kubernetes_cluster" "hometask_AKS" {
   name                = var.aks_name
   resource_group_name = azurerm_resource_group.hometask_rg.name
@@ -125,11 +134,12 @@ resource "azurerm_kubernetes_cluster" "hometask_AKS" {
   depends_on = [azurerm_subnet.hometask_subnet]
 }
 
+
+##############      Scope map+Token creation    ###############
 data "azurerm_container_registry" "my_acr" {
   name                = azurerm_container_registry.images_vault.name
   resource_group_name = azurerm_resource_group.hometask_rg.name
 }
-
 resource "azurerm_container_registry_scope_map" "acr_scope_map" {
   name                    = "acr-scope-map"
   resource_group_name     = azurerm_resource_group.hometask_rg.name
@@ -137,8 +147,6 @@ resource "azurerm_container_registry_scope_map" "acr_scope_map" {
 
   actions = ["repositories/*/content/read"]
 }
-
-
 resource "azurerm_container_registry_token" "acr_token" {
   name                       = "acr-token"
   resource_group_name        = azurerm_resource_group.hometask_rg.name
@@ -146,26 +154,25 @@ resource "azurerm_container_registry_token" "acr_token" {
   scope_map_id               = azurerm_container_registry_scope_map.acr_scope_map.id
   enabled                    = true
 }
-
 resource "azurerm_container_registry_token_password" "acr_token_password" {
   container_registry_token_id = azurerm_container_registry_token.acr_token.id
 
   password1 {
   }
 }
-
 output "acr_token_password" {
   value = azurerm_container_registry_token_password.acr_token_password.password1
   sensitive = true
 }
 
+
+#############     Create K8S secret     ###############
 provider "kubernetes" {
   host                   = azurerm_kubernetes_cluster.hometask_AKS.kube_config[0].host
   client_certificate      = base64decode(azurerm_kubernetes_cluster.hometask_AKS.kube_config[0].client_certificate)
   client_key              = base64decode(azurerm_kubernetes_cluster.hometask_AKS.kube_config[0].client_key)
   cluster_ca_certificate  = base64decode(azurerm_kubernetes_cluster.hometask_AKS.kube_config[0].cluster_ca_certificate)
 }
-
 resource "kubernetes_secret" "acr_docker_registry_secret" {
   metadata {
     name      = "acr-docker-registry-secret"
@@ -214,17 +221,16 @@ resource "azurerm_role_assignment" "assign_acr_to_k8s" {
   depends_on = [null_resource.run_role_assignment_script]
 }
 
-# After Terraform finishes creating resources, manually point kubectl to the azure AKS:
-# az aks get-credentials --resource-group ${var.my_resource_group_name} --name ${var.aks_name}
 
 
-
-# Organization must be created in advance and cannot be created with terraform #
+############   Organization must be created in advance and cannot be created with terraform    ###########
 provider "azuredevops" {
   org_service_url       =  var.org_service_url
   personal_access_token =  var.org_pat
 }
 
+
+############    Project creation    #############   
 resource "azuredevops_project" "cicd_project" {
   name               = var.cicd_project_name
   visibility         = "private"
@@ -232,6 +238,8 @@ resource "azuredevops_project" "cicd_project" {
   work_item_template = "Agile"
 }
 
+
+############     Variable list of dict creation (will be looped later to create variable group )    ##############
 locals {
   my_variables = [
     {
@@ -277,6 +285,8 @@ locals {
   ]
 }
 
+
+##########     Service connection creation     ############
 resource "azuredevops_serviceendpoint_dockerregistry" "acr_service_connection" {
   project_id            = azuredevops_project.cicd_project.id
   service_endpoint_name = var.to_acr_service_connection_name
@@ -287,6 +297,7 @@ resource "azuredevops_serviceendpoint_dockerregistry" "acr_service_connection" {
   docker_password       = var.client_secret
 }
 
+##########     Service connection creation     ############
 resource "azuredevops_serviceendpoint_azurerm" "arm_service_connection" {
   project_id            = azuredevops_project.cicd_project.id
   service_endpoint_name = var.to_rg_service_connection_name
@@ -299,6 +310,7 @@ resource "azuredevops_serviceendpoint_azurerm" "arm_service_connection" {
   resource_group = azurerm_resource_group.hometask_rg.name
 }
 
+############     Variable group creation      ##############
 resource "azuredevops_variable_group" "my_variable_group" {
   project_id  = azuredevops_project.cicd_project.id
   name        =  var.var_group_name
@@ -315,3 +327,5 @@ resource "azuredevops_variable_group" "my_variable_group" {
 }
 
 
+# After Terraform finishes creating resources, Point kubectl to the azure AKS:
+# az aks get-credentials --resource-group ${var.my_resource_group_name} --name ${var.aks_name}
