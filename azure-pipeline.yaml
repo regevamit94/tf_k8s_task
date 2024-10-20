@@ -24,7 +24,7 @@ steps:
       sed -i 's#{{ACR_LOGIN_SERVER}}#$(ACR_LOGIN_SERVER)#g' app.yaml
       sed -i 's#{{IMAGE_NAME}}#$(IMAGE_NAME)#g' app.yaml
       sed -i 's#{{IMAGE_TAG}}#$(IMAGE_TAG)#g' app.yaml
-      sed -i 's#{{LOADBALANCER_PUB_IP}}#$(PUBLIC_IP)#g' app.yaml
+      sed -i 's#{{PUBLIC_IP}}#$(PUBLIC_IP)#g' app.yaml
 
   - task: Kubernetes@1
     inputs:
