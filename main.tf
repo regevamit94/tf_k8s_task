@@ -245,7 +245,7 @@ locals {
       is_secret = false
     },
     {
-      name      = "ACR_SERVICE_CON"
+      name      = "TO_ACR_SERVICE_CON"
       value     = azuredevops_serviceendpoint_dockerregistry.acr_service_connection.service_endpoint_name
       is_secret = false
     },
@@ -270,8 +270,8 @@ locals {
       is_secret = false
     },
     {
-      name      = "K8S_SERVICE_CON"
-      value     = azuredevops_serviceendpoint_dockerregistry.acr_service_connection.service_endpoint_name
+      name      = "TO_RG_SERVICE_CON"
+      value     = azuredevops_serviceendpoint_azurerm.arm_service_connection.service_endpoint_name
       is_secret = false
     }
   ]
